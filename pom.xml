@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.3</version>
+    </parent>
+    <groupId>com.zero</groupId>
+    <artifactId>springboot-dynamic</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>springboot-dynamic</name>
+    <description>
+        Java SpringBoot 执行动态编译、动态脚本.
+            - JavaScript
+            - Python
+            - Java
+            - Lua
+            - ...
+    </description>
+    <properties>
+        <java.version>24</java.version>
+        <maven.compiler.source>24</maven.compiler.source>
+        <maven.compiler.target>24</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <graaljs.version>24.2.1</graaljs.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Graalvm Js -->
+        <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>polyglot</artifactId>
+            <version>${graaljs.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <!-- 可选择语言：js, ruby, python, llvm... -->
+            <artifactId>js</artifactId>
+            <version>${graaljs.version}</version>
+            <type>pom</type>
+        </dependency>
+        <!-- Graalvm Py -->
+<!--        <dependency>-->
+<!--            <groupId>org.graalvm.python</groupId>-->
+<!--            <artifactId>python</artifactId>-->
+<!--            <version>${graaljs.version}</version>-->
+<!--            <type>pom</type>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash; 嵌入 Python 运行时（解释器、标准库等） &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.graalvm.python</groupId>-->
+<!--            <artifactId>python-embedding</artifactId>-->
+<!--            <version>${graaljs.version}</version>-->
+<!--        </dependency>-->
+
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${artifactId}</finalName>
+        <plugins>
+            <!-- Maven -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <fork>true</fork>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.zero.dynamic.DynamicScriptApplication</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+
+            <!-- 打包时将所需依赖额外拷贝出来一份 target/modules -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/modules</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                            <includeTypes>jar</includeTypes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven SpringBoot  -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+
+            <!-- Graalvm Python 自动安装Python第三方包 -->
+<!--            <plugin>-->
+<!--                <groupId>org.graalvm.python</groupId>-->
+<!--                <artifactId>graalpy-maven-plugin</artifactId>-->
+<!--                <version>${graaljs.version}</version>-->
+<!--                <configuration>-->
+<!--                    <packages> &lt;!&ndash; ① &ndash;&gt;-->
+<!--                        <package>vader-sentiment==3.2.1.1</package> &lt;!&ndash; ② &ndash;&gt;-->
+<!--                        <package>requests</package> &lt;!&ndash; ③ &ndash;&gt;-->
+<!--                    </packages>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>process-graalpy-resources</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+        </plugins>
+    </build>
+
+</project>
