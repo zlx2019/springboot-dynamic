@@ -1,3 +1,3 @@
-# 动态处理
+# Dynamic processing
 - Graalvm Js Py
 - Java dynamic compile
